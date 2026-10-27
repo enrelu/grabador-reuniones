@@ -1,0 +1,32 @@
+bin/
+obj/
+dist/
+.vs/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupk
+.nuget/
+*.log
+.idea/
+*.DotSettings.user
+*.DS_Store
+
+# Configuraciones y secretos locales
+settings.json
+presets.json
+*.env
+*.env.*
+*.key
+*.pem
+*.pfx
+*.cert
+
+# Grabaciones de audio locales
+*.wav
+*.mp3
+*.m4a
+*.aac

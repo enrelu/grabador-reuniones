@@ -1,0 +1,25 @@
+﻿name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Test
+        run: dotnet test GrabadorReuniones.sln -c Release --nologo
+      - name: Publish win-x64 (cross)
+        run: |
+          dotnet publish src/GrabadorReuniones/GrabadorReuniones.csproj \
+            -c Release -r win-x64 --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableWindowsTargeting=true \
+            -o dist/win-x64
