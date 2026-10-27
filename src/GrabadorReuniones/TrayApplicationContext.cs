@@ -1,4 +1,4 @@
-﻿using GrabadorReuniones.Core;
+using GrabadorReuniones.Core;
 
 namespace GrabadorReuniones;
 
@@ -165,13 +165,24 @@ internal sealed class TrayApplicationContext : ApplicationContext
                 return;
 
             _detectedMeetingApp = detection.AppName;
-            _openPopup = new MeetingPromptPopup(detection, _presetStore, _settings.AutoDetectPromptPreset);
-            _openPopup.StartRecordingRequested += presetId =>
+            var popup = new MeetingPromptPopup(detection, _presetStore, _settings.AutoDetectPromptPreset);
+            _openPopup = popup;
+
+            popup.StartRecordingRequested += presetId =>
             {
+                _detector.DismissAppAlert(detection.AppName, TimeSpan.FromHours(2));
                 _activeRecordingPresetId = presetId;
                 StartRecording();
             };
-            _openPopup.Show();
+
+            popup.FormClosed += (_, _) =>
+            {
+                _detector.DismissAppAlert(detection.AppName, TimeSpan.FromMinutes(30));
+                if (ReferenceEquals(_openPopup, popup))
+                    _openPopup = null;
+            };
+
+            popup.Show();
         });
     }
 
@@ -219,6 +230,12 @@ internal sealed class TrayApplicationContext : ApplicationContext
         {
             if (_recorder.IsRecording || _finalizing)
                 return;
+        }
+
+        if (_openPopup != null && !_openPopup.IsDisposed)
+        {
+            try { _openPopup.Close(); } catch { }
+            _openPopup = null;
         }
 
         if (!string.IsNullOrWhiteSpace(presetId))
